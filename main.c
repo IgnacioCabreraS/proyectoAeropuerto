@@ -30,8 +30,7 @@ typedef struct{
     int descuento;
 }ofertaVuelo;
 
-// prototipos
-
+// Prototipos
 int lower_than_double(void * , void* );
 int lower_than_string(void* key1, void* key2);
 char*get_csv_field (char * tmp, int k);
@@ -43,9 +42,8 @@ void* comprarPasaje(List* listaVuelos, List* listaPasajes);
 void* busquedaVuelos(List* listaVuelos);
 void* estadoVuelos(List* listaPasajes);
 void* revisarPasaje(List* listaPasajes);
-void* ofertasDisponibles(List* listaVuelos);
-void* modificarVuelos(List * ListVuelos);
-
+void* ofertasAplicadas(List* listaVuelos);
+void* modificarVuelos(List * listaVuelos);
 
 
 int main (){
@@ -86,7 +84,7 @@ void* modoPasajero (List* listaVuelos,List* listaPasajes){
             case 2: busquedaVuelos(listaVuelos);break;
             case 3: estadoVuelos(listaPasajes);break;
             case 4: revisarPasaje(listaPasajes);break;
-            case 5: ofertasDisponibles(listaVuelos);break;
+            case 5: ofertasAplicadas(listaVuelos);break;
             case 6: modoAdministrador(listaVuelos,listaPasajes);break;
             default: break;
         }
@@ -94,7 +92,7 @@ void* modoPasajero (List* listaVuelos,List* listaPasajes){
     
 }
 
-void* modoAdministrador (List* mapaVuelo,List* listaPasajes){
+void* modoAdministrador (List* listaVuelos,List* listaPasajes){
 
     int opcion = 1;
     while(opcion != 0){
@@ -103,8 +101,8 @@ void* modoAdministrador (List* mapaVuelo,List* listaPasajes){
         
         scanf("%d", &opcion);
         switch (opcion){
-            case 1:modificarVuelos(mapaVuelo);break;
-            case 2:modoPasajero(mapaVuelo,listaPasajes);break;
+            case 1:modificarVuelos(listaVuelos);break;
+            case 2:modoPasajero(listaVuelos,listaPasajes);break;
             default: break;
         }
     }
@@ -301,7 +299,7 @@ List * importarOfertas(List * listaVuelos){
 }
 
 void * comprarPasaje(List *listaVuelos, List *listaPasajes){
-    
+    //--...--
 }
 
 void * busquedaVuelos(List *listaVuelos){
@@ -322,7 +320,100 @@ void * busquedaVuelos(List *listaVuelos){
     }
 
     // -----------FILTROS------------
-    printf("");
+    printf("Desea filtrar su busqueda?\n");
+    printf("Escriba 'Si' si quiere desplegar un mernu con los filtros a escoger\n");
+    char * confirmacion = (char*)malloc(3*sizeof(char));
+    confirmacion = "Si";
+    char* palabra = (char*)malloc(3*sizeof(char));
+    scanf("%s", palabra);
+    if(strcmp(palabra,confirmacion) == 0){
+
+        int opcion=1;
+        while(opcion != 0){
+
+            printf("---------Opciones--------\n");
+            printf("1. Empresa\n");
+            printf("2. Precio\n");
+            printf("3. Hora\n");
+            printf("0. Salir\n");
+
+            scanf("%i", &opcion);
+            switch (opcion){
+                case 1: 
+                    cont = 1;
+                    
+                    L = firstList(listaVuelos);
+                    printf("Segun que empresa desea su vuelo: ");
+                    char * empresa = (char*) malloc(40*sizeof(char));
+                    scanf(" %[^\n]s]", empresa);
+
+                    while(L != NULL){
+                        
+                        if(strcmp(L->empresa,empresa)==0){
+                            if(strcmp(L->ciudad,destiny)==0){
+                                printf("(%i) Empresa: %s\n", cont, L->empresa);
+                                cont++;
+                            }
+                        }
+                        L = nextList(listaVuelos); 
+
+                    }
+                    break;
+                
+                case 2:
+                    cont = 1;
+
+                    printf("Ingrese rango de precio\n");
+                    printf("Ingrese el rango minimo: ");
+                    int rangoUno;
+                    scanf("%i", &rangoUno);
+                    printf("Ingrese el rango maximo: ");
+                    int rangoDos;
+                    scanf("%i", &rangoDos);
+                    
+                    L = firstList(listaVuelos);
+
+                    while(L != NULL){
+                        
+                        if(strcmp(L->ciudad,destiny)==0){
+                            if(L->precio >= rangoUno && L->precio <= rangoDos){
+                                printf("(%i) Empresa: %s || Pais: %s || Ciudad: %s || Precio: %i || Asientos Ocupados: %hu || Asientos Totales: %hu || Hora: %.2lf \n",cont,L->empresa,L->pais,L->ciudad,L->precio,L->infoAvion->asientosOcupados,L->infoAvion->asientosTotales, L->hora);
+                                cont++;
+                            }
+                        }
+                        L = nextList(listaVuelos); 
+                    }
+
+                break;
+
+                case 3:
+                    cont = 1;
+                    printf("Ingrese una rangos de horas\n");
+                    printf("Ingrese hora minima: ");
+                    double horaUno;
+                    scanf("%lf", &horaUno);
+                    printf("Ingrese hora maxima: ");
+                    double horaDos;
+                    scanf("%lf", &horaDos);
+                    
+                    L = firstList(listaVuelos);
+
+                    while(L != NULL){
+                        
+                        if(strcmp(L->ciudad,destiny) == 0){
+                            if(L->hora >= horaUno && L->hora <= horaDos){
+                                printf("(%i) Empresa: %s || Pais: %s || Ciudad: %s || Precio: %i || Asientos Ocupados: %hu || Asientos Totales: %hu || Hora: %.2lf \n",cont,L->empresa,L->pais,L->ciudad,L->precio,L->infoAvion->asientosOcupados,L->infoAvion->asientosTotales, L->hora);
+                                cont++;
+                            }
+                        }
+                        L = nextList(listaVuelos); 
+                    }
+
+                break;
+
+            }
+        }        
+    }
 }
 
 void * estadoVuelos(List *listaPasajes){
@@ -333,6 +424,23 @@ void * revisarPasaje(List *listaPasajes){
     
 }
 
-void * ofertasDisponibles(List*listaVuelos){
+void * ofertasAplicadas(List*listaVuelos){
+
+    ofertaVuelo* ofertitas = (ofertaVuelo*)malloc(sizeof(ofertaVuelo));
+    // mostrar todas las ofertas con los datos de la struct ofertas 
+    vuelo * L = (vuelo*)malloc(sizeof(vuelo));
+    L = firstList(listaVuelos);
+    int cont=1;
+    while(L!= NULL){
+
+        if(L->ofertaAplicada == true){
+            printf("(%i) Empresa: %s || Pais: %s || Ciudad: %s || Precio: %i || Asientos Ocupados: %hu || Asientos Totales: %hu || Hora: %.2lf \n",cont,L->empresa,L->pais,L->ciudad,L->precio,L->infoAvion->asientosOcupados,L->infoAvion->asientosTotales, L->hora);
+            cont++;
+        }
+        L = nextList(listaVuelos);
+    }
+
+}
+void * modificarVuelos(List * listaVuelos){
 
 }
