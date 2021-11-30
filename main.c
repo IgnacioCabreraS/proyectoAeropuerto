@@ -9,8 +9,8 @@
 #include "treemap.h"
 
 typedef struct{
-    unsigned asientos;
-    unsigned cantPasajeros;
+    unsigned asientosOcupados;
+    unsigned asientosTotales;
 }avion;
 
 typedef struct{
@@ -35,25 +35,25 @@ typedef struct{
 int lower_than_double(void * , void* );
 int lower_than_string(void* key1, void* key2);
 char*get_csv_field (char * tmp, int k);
-TreeMap* importarVuelos(TreeMap * mapaVuelos);
-TreeMap* importarOfertas(TreeMap* mapaVuelos);
-void* modoPasajero(TreeMap* mapaVuelos, List* listaPasajes);
-void* modoAdministrador(TreeMap* mapaVuelos, List* listaPasajes);
-void* comprarPasaje(TreeMap* mapaVuelos, List* listaPasajes);
-void* busquedaVuelos(TreeMap* mapaVuelos);
+List* importarVuelos(List * listaVuelos);
+List* importarOfertas(List* listaVuelos);
+void* modoPasajero(List* listaVuelos, List* listaPasajes);
+void* modoAdministrador(List* listaVuelos, List* listaPasajes);
+void* comprarPasaje(List* listaVuelos, List* listaPasajes);
+void* busquedaVuelos(List* listaVuelos);
 void* estadoVuelos(List* listaPasajes);
 void* revisarPasaje(List* listaPasajes);
-void* ofertasDisponibles(TreeMap* mapaVuelos);
-void* modificarVuelos(TreeMap* mapaVuelos);
+void* ofertasDisponibles(List* listaVuelos);
+void* modificarVuelos(List * ListVuelos);
 
 
 
 int main (){
 
-    TreeMap* mapaVuelos = createTreeMap(lower_than_string);
+    List* listaVuelos = createList();
     List* listaPasajes = createList();
-    importarVuelos(mapaVuelos);
-    importarOfertas(mapaVuelos);
+    importarVuelos(listaVuelos);
+    importarOfertas(listaVuelos);
     
     int opcion=1;
     while(opcion!=0){
@@ -62,14 +62,14 @@ int main (){
         printf("0. Salir.\n");
         scanf("%d",&opcion);
         switch(opcion){
-            case 1:modoPasajero(mapaVuelos,listaPasajes);break; //  pasar opcion para verificar si se sale del switch
-            case 2:modoAdministrador(mapaVuelos, listaPasajes);break;
+            case 1:modoPasajero(listaVuelos,listaPasajes);break; //  pasar opcion para verificar si se sale del switch
+            case 2:modoAdministrador(listaVuelos, listaPasajes);break;
         }
     }
     return 0;
 }
 
-void* modoPasajero (TreeMap* mapaVuelo,List* listaPasajes){
+void* modoPasajero (List* listaVuelos,List* listaPasajes){
 
     int opcion = 1;
     while(opcion != 0){
@@ -82,19 +82,19 @@ void* modoPasajero (TreeMap* mapaVuelo,List* listaPasajes){
         
         scanf("%d", &opcion);
         switch (opcion){
-            case 1: comprarPasaje(mapaVuelo,listaPasajes);break;
-            case 2: busquedaVuelos(mapaVuelo);break;
+            case 1: comprarPasaje(listaVuelos,listaPasajes);break;
+            case 2: busquedaVuelos(listaVuelos);break;
             case 3: estadoVuelos(listaPasajes);break;
             case 4: revisarPasaje(listaPasajes);break;
-            case 5: ofertasDisponibles(mapaVuelo);break;
-            case 6: modoAdministrador(mapaVuelo,listaPasajes);break;
+            case 5: ofertasDisponibles(listaVuelos);break;
+            case 6: modoAdministrador(listaVuelos,listaPasajes);break;
             default: break;
         }
     }
     
 }
 
-void* modoAdministrador (TreeMap* mapaVuelo,List* listaPasajes){
+void* modoAdministrador (List* mapaVuelo,List* listaPasajes){
 
     int opcion = 1;
     while(opcion != 0){
@@ -156,7 +156,7 @@ char * get_csv_field (char * tmp, int k){
     return NULL;
 }
 
-TreeMap * importarVuelos(TreeMap * mapaVuelos){
+List * importarVuelos(List * listaVuelos){
     char archivo[101];
     FILE* file;
 
@@ -200,29 +200,27 @@ TreeMap * importarVuelos(TreeMap * mapaVuelos){
             }
 
             if(i == 4){
-                avionC->cantPasajeros = atoi(aux);
+                avionC->asientosOcupados = atoi(aux);
             }
 
             if(i == 5){
-                avionC->asientos = atoi(aux);
+                avionC->asientosTotales = atoi(aux);
             }
             if(i == 6){
                 vueloC->hora = atof(aux);
             }
 
             vueloC->infoAvion = avionC;
-
-            
         }
 
         vueloC->ofertaAplicada=false;
-        insertTreeMap(mapaVuelos,vueloC->ciudad,vueloC);
+        pushBack(listaVuelos,vueloC);
         cont++; 
         if(cont == 42) break;
     } 
 }
 
-TreeMap * importarOfertas(TreeMap * mapaVuelos){
+List * importarOfertas(List * listaVuelos){
     
     FILE* file;
     file = fopen("Ofertas.csv","r");
@@ -268,64 +266,63 @@ TreeMap * importarOfertas(TreeMap * mapaVuelos){
     ofertaVuelo * L = (ofertaVuelo*)malloc(sizeof(ofertaVuelo));
     L = firstList(listaOfertas);
     while(L != NULL){
-        Pair * M = firstTreeMap(mapaVuelos);
+        vuelo * M = (vuelo*)malloc(sizeof(vuelo));
+        M= firstList(listaVuelos);
         
         while(M != NULL){
             
-            vuelo * vuelardos = (vuelo*)malloc(sizeof(vuelo));
-            vuelardos = M->value;
+            
             bool uno=false,dos=false,tres=false;
 
-            if(strcmp(vuelardos->empresa,L->empresa) == 0){
+            if(strcmp(M->empresa,L->empresa) == 0){
                 uno=true;
             }
 
-            if(strcmp(vuelardos->pais,L->pais) == 0){
+            if(strcmp(M->pais,L->pais) == 0){
                 dos=true;
             }
 
-            if(strcmp(vuelardos->ciudad,L->ciudad) == 0){
+            if(strcmp(M->ciudad,L->ciudad) == 0){
                 tres=true;
             }
 
             if(tres == true && dos == true && uno == true){
                 double ofertaza;
                 ofertaza = (double)L->descuento/100;
-                vuelardos->precio = vuelardos->precio-(vuelardos->precio*ofertaza);
-                vuelardos->ofertaAplicada= true;
+                M->precio = M->precio-(M->precio*ofertaza);
+                M->ofertaAplicada= true;
                 //printf("Ofertarda: %d\n",vuelardos->precio);
             }
             
-            M = nextTreeMap(mapaVuelos);   
+            M = nextList(listaVuelos);   
         }
         L=nextList(listaOfertas);
     }
 }
 
-void * comprarPasaje(TreeMap *mapaVuelos, List *listaPasajes){
+void * comprarPasaje(List *listaVuelos, List *listaPasajes){
     
 }
 
-void * busquedaVuelos(TreeMap *mapaVuelos){
+void * busquedaVuelos(List *listaVuelos){
     
     printf("Ingrese el destino deseado:");
     char * destiny = (char*) malloc(40*sizeof(char));
+    int cont = 1;
     scanf(" %[^\n]s]", destiny);
-
-    Pair * M = firstTreeMap(mapaVuelos);
-    while(M != NULL){
-        vuelo * vuelardos = (vuelo*)malloc(sizeof(vuelo));
-        vuelardos = M->value;
-
-        if(strcmp(vuelardos->ciudad,destiny)==0){
-            printf("VUELO: %s\n",vuelardos->ciudad);
+    vuelo * L = (vuelo*)malloc(sizeof(vuelo));
+    L = firstList(listaVuelos);
+    printf("VUELOS ENCONTRADOS:\n");
+    while(L != NULL){
+        if(strcmp(L->ciudad,destiny)==0){
+            printf("(%i) Empresa: %s || Pais: %s || Ciudad: %s || Precio: %i || Asientos Ocupados: %hu || Asientos Totales: %hu || Hora: %.2lf \n",cont,L->empresa,L->pais,L->ciudad,L->precio,L->infoAvion->asientosOcupados,L->infoAvion->asientosTotales, L->hora);
+            cont++;
         }
-
-        M = nextTreeMap(mapaVuelos); 
+        L = nextList(listaVuelos); 
     }
 
-
-
+    // -----------FILTROS------------
+    printf("");
 }
 
 void * estadoVuelos(List *listaPasajes){
@@ -336,10 +333,6 @@ void * revisarPasaje(List *listaPasajes){
     
 }
 
-void * ofertasDisponibles(TreeMap *mapaVuelo){
-    
-}
+void * ofertasDisponibles(List*listaVuelos){
 
-void * modificarVuelos(TreeMap *mapaVuelo){
-    
 }
