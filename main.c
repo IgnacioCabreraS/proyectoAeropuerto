@@ -6,7 +6,9 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include "list.h"
-#include "treemap.h"
+#include "map.h"
+
+double horaGeneral = 0;
 
 typedef struct{
     unsigned asientosOcupados;
@@ -21,6 +23,7 @@ typedef struct{
     double hora;
     bool ofertaAplicada;
     int precio;
+    bool habilitado;
 }vuelo;
 
 typedef struct{
@@ -31,27 +34,28 @@ typedef struct{
 }ofertaVuelo;
 
 // Prototipos
-int lower_than_double(void * , void* );
-int lower_than_string(void* key1, void* key2);
+
+int isEqualString(void * key1, void * key2);
 char*get_csv_field (char * tmp, int k);
-List* importarVuelos(List * listaVuelos);
-List* importarOfertas(List* listaVuelos);
-void* modoPasajero(List* listaVuelos, List* listaPasajes);
-void* modoAdministrador(List* listaVuelos, List* listaPasajes);
-void* comprarPasaje(List* listaVuelos, List* listaPasajes);
-void* busquedaVuelos(List* listaVuelos);
+Map* importarVuelos(Map * mapaVuelos);
+Map* importarOfertas(Map* mapaVuelos);
+void* modoPasajero(Map* mapaVuelos, List* listaPasajes);
+void* modoAdministrador(Map* mapaVuelos, List* listaPasajes);
+void* revisionHoraAvion(double horaGeneral, Map* mapaVuelos);
+void* comprarPasaje(Map* mapaVuelos, List* listaPasajes);
+void* busquedaVuelos(Map* mapaVuelos);
 void* estadoVuelos(List* listaPasajes);
 void* revisarPasaje(List* listaPasajes);
-void* ofertasAplicadas(List* listaVuelos);
-void* modificarVuelos(List * listaVuelos);
+void* ofertasAplicadas(Map* mapaVuelos);
+void* modificarVuelos(Map * mapaVuelos);
 
 
 int main (){
 
-    List* listaVuelos = createList();
+    Map* mapaVuelos = createMap(isEqualString);
     List* listaPasajes = createList();
-    importarVuelos(listaVuelos);
-    importarOfertas(listaVuelos);
+    importarVuelos(mapaVuelos);
+    importarOfertas(mapaVuelos);
     
     int opcion=1;
     while(opcion!=0){
@@ -60,14 +64,14 @@ int main (){
         printf("0. Salir.\n");
         scanf("%d",&opcion);
         switch(opcion){
-            case 1:modoPasajero(listaVuelos,listaPasajes);break; //  pasar opcion para verificar si se sale del switch
-            case 2:modoAdministrador(listaVuelos, listaPasajes);break;
+            case 1:modoPasajero(mapaVuelos,listaPasajes);break; //  pasar opcion para verificar si se sale del switch
+            case 2:modoAdministrador(mapaVuelos, listaPasajes);break;
         }
     }
     return 0;
 }
 
-void* modoPasajero (List* listaVuelos,List* listaPasajes){
+void* modoPasajero (Map* mapaVuelos,List* listaPasajes){
 
     int opcion = 1;
     while(opcion != 0){
@@ -80,19 +84,19 @@ void* modoPasajero (List* listaVuelos,List* listaPasajes){
         
         scanf("%d", &opcion);
         switch (opcion){
-            case 1: comprarPasaje(listaVuelos,listaPasajes);break;
-            case 2: busquedaVuelos(listaVuelos);break;
-            case 3: estadoVuelos(listaPasajes);break;
-            case 4: revisarPasaje(listaPasajes);break;
-            case 5: ofertasAplicadas(listaVuelos);break;
-            case 6: modoAdministrador(listaVuelos,listaPasajes);break;
+            case 1: comprarPasaje(mapaVuelos,listaPasajes);break;
+            case 2: busquedaVuelos(mapaVuelos);break;
+            //case 3: estadoVuelos(listaPasajes);break;
+            //case 4: revisarPasaje(listaPasajes);break;
+            case 5: ofertasAplicadas(mapaVuelos);break;
+            case 6: modoAdministrador(mapaVuelos,listaPasajes);break;
             default: break;
         }
     }
     
 }
 
-void* modoAdministrador (List* listaVuelos,List* listaPasajes){
+void* modoAdministrador (Map* mapaVuelos,List* listaPasajes){
 
     int opcion = 1;
     while(opcion != 0){
@@ -101,25 +105,17 @@ void* modoAdministrador (List* listaVuelos,List* listaPasajes){
         
         scanf("%d", &opcion);
         switch (opcion){
-            case 1:modificarVuelos(listaVuelos);break;
-            case 2:modoPasajero(listaVuelos,listaPasajes);break;
+            //case 1:modificarVuelos(mapaVuelos);break;
+            case 2:modoPasajero(mapaVuelos,listaPasajes);break;
             default: break;
         }
     }
 }
 
-int lower_than_double(void * key1, void * key2) {
-    if(*(double*)key1 > *(double*)key2) return 1;
+int isEqualString(void * key1, void * key2){
+    if(strcmp((char*)key1, (char*)key2)==0) return 1;
     return 0;
 }
-
-int lower_than_string(void* key1, void* key2){
-    char* k1=(char*) key1;
-    char* k2=(char*) key2;
-    if(strcmp(k1,k2)<0) return 1;
-    return 0;
-}
-
 
 char * get_csv_field (char * tmp, int k){
     int open_mark = 0;
@@ -154,7 +150,46 @@ char * get_csv_field (char * tmp, int k){
     return NULL;
 }
 
-List * importarVuelos(List * listaVuelos){
+void* revisionHoraAvion(double horaGeneral,Map* mapaVuelos){
+
+    if(horaGeneral == 24){
+        printf("No quedan mas vuelos XD\n");
+        exit(1);
+    }
+
+    double parteDecimal, auxHoraG,parteEntera;
+    auxHoraG=horaGeneral;
+    parteDecimal= modf(auxHoraG,&parteEntera);
+
+    if(parteDecimal == 0.5){
+       auxHoraG=auxHoraG-0.2;
+       printf("HoraG: %lf\n",auxHoraG);
+    }
+
+    
+
+    List * L;
+    L = firstMap(mapaVuelos);
+    printf("HoraG antes de whiles: %lf\n",auxHoraG);
+    while(L != NULL){
+        vuelo * vueloski = (vuelo*)malloc(sizeof(vuelo));
+        vueloski = firstList(L);
+        while(vueloski!=NULL){
+            if(vueloski->hora<=auxHoraG){
+                if(vueloski->habilitado == true){
+                    vueloski->habilitado=false;
+                    printf("Vuelo hacia %s,%s ha sido inhabilitado.\n",vueloski->ciudad,vueloski->pais);
+                }
+                
+            }
+            vueloski = nextList(L);
+        }
+        L = nextMap(mapaVuelos);
+    }
+
+}
+
+Map * importarVuelos(Map * mapaVuelos){
     char archivo[101];
     FILE* file;
 
@@ -190,7 +225,7 @@ List * importarVuelos(List * listaVuelos){
 
             if(i == 2){
                 vueloC->ciudad = aux;
-                
+                //printf("VueloC->ciudad 1 : %s\n",vueloC->ciudad);
             }
 
             if(i == 3){
@@ -208,17 +243,31 @@ List * importarVuelos(List * listaVuelos){
                 vueloC->hora = atof(aux);
             }
 
+            vueloC->ofertaAplicada=false;
+            vueloC->habilitado=true;
             vueloC->infoAvion = avionC;
         }
 
-        vueloC->ofertaAplicada=false;
-        pushBack(listaVuelos,vueloC);
+        const char * M;
+        M = searchMap(mapaVuelos,vueloC->ciudad);
+        if(M == NULL){
+            List * listaVuelardos = createList();
+            pushFront(listaVuelardos,vueloC);
+            insertMap(mapaVuelos,vueloC->ciudad,listaVuelardos);
+            //printf("VueloC->ciudad 2: %s\n",vueloC->ciudad);
+        }
+        else{
+            List * L = (List*)searchMap(mapaVuelos,vueloC->ciudad);
+            pushFront(L,vueloC);
+            //printf("VueloC->ciudad 3: %s\n",vueloC->ciudad);
+        }
+        
         cont++; 
         if(cont == 42) break;
     } 
 }
 
-List * importarOfertas(List * listaVuelos){
+Map * importarOfertas(Map * mapaVuelos){
     
     FILE* file;
     file = fopen("Ofertas.csv","r");
@@ -264,61 +313,77 @@ List * importarOfertas(List * listaVuelos){
     ofertaVuelo * L = (ofertaVuelo*)malloc(sizeof(ofertaVuelo));
     L = firstList(listaOfertas);
     while(L != NULL){
-        vuelo * M = (vuelo*)malloc(sizeof(vuelo));
-        M= firstList(listaVuelos);
-        
-        while(M != NULL){
-            
+        //printf("INICIO\n");
+        List * M = (List*)searchMap(mapaVuelos,L->ciudad);
+
+        vuelo * vuelardoXD = (vuelo*)malloc(sizeof(vuelo));
+        vuelardoXD = firstList(M);
+
+        while(vuelardoXD != NULL){
             
             bool uno=false,dos=false,tres=false;
 
-            if(strcmp(M->empresa,L->empresa) == 0){
+            if(strcmp(vuelardoXD->empresa,L->empresa) == 0){
                 uno=true;
+                //printf("Empresa: %s\n",vuelardoXD->empresa);
             }
 
-            if(strcmp(M->pais,L->pais) == 0){
+            if(strcmp(vuelardoXD->pais,L->pais) == 0){
                 dos=true;
+                //printf("pais: %s\n",vuelardoXD->pais);
             }
 
-            if(strcmp(M->ciudad,L->ciudad) == 0){
+            if(strcmp(vuelardoXD->ciudad,L->ciudad) == 0){
                 tres=true;
+                //printf("ciudad: %s\n",vuelardoXD->ciudad);
             }
 
             if(tres == true && dos == true && uno == true){
                 double ofertaza;
                 ofertaza = (double)L->descuento/100;
-                M->precio = M->precio-(M->precio*ofertaza);
-                M->ofertaAplicada= true;
+                vuelardoXD->precio = vuelardoXD->precio-(vuelardoXD->precio*ofertaza);
+                vuelardoXD->ofertaAplicada= true;
                 //printf("Ofertarda: %d\n",vuelardos->precio);
             }
             
-            M = nextList(listaVuelos);   
+            vuelardoXD = nextList(M);
         }
+        //printf("PASA\n");
         L=nextList(listaOfertas);
     }
+
+    
 }
 
-void * comprarPasaje(List *listaVuelos, List *listaPasajes){
+void * comprarPasaje(Map *mapaVuelos, List *listaPasajes){
     //--...--
 }
 
-void * busquedaVuelos(List *listaVuelos){
+void * busquedaVuelos(Map *mapaVuelos){
     
     printf("Ingrese el destino deseado:");
     char * destiny = (char*) malloc(40*sizeof(char));
-    int cont = 1;
+    
     scanf(" %[^\n]s]", destiny);
-    vuelo * L = (vuelo*)malloc(sizeof(vuelo));
-    L = firstList(listaVuelos);
+    List * L;
+    L = firstMap(mapaVuelos);
+    int cont=1;
+
     printf("VUELOS ENCONTRADOS:\n");
     while(L != NULL){
-        if(strcmp(L->ciudad,destiny)==0){
-            printf("(%i) Empresa: %s || Pais: %s || Ciudad: %s || Precio: %i || Asientos Ocupados: %hu || Asientos Totales: %hu || Hora: %.2lf \n",cont,L->empresa,L->pais,L->ciudad,L->precio,L->infoAvion->asientosOcupados,L->infoAvion->asientosTotales, L->hora);
-            cont++;
+        vuelo * vueloski = (vuelo*)malloc(sizeof(vuelo));
+        vueloski = firstList(L);
+        while(vueloski!=NULL){
+            if(strcmp(vueloski->ciudad,destiny)==0){
+                printf("(%i) Empresa: %s || Pais: %s || Ciudad: %s || Precio: %i || Asientos Ocupados: %hu || Asientos Totales: %hu || Hora: %d ||\n",cont,vueloski->empresa,vueloski->pais,vueloski->ciudad,vueloski->precio,vueloski->infoAvion->asientosOcupados,vueloski->infoAvion->asientosTotales, vueloski->hora);
+                cont++;
+            }
+            vueloski = nextList(L);
         }
-        L = nextList(listaVuelos); 
+        
+        L = nextMap(mapaVuelos); 
     }
-
+    
     // -----------FILTROS------------
     printf("Desea filtrar su busqueda?\n");
     printf("Escriba 'Si' si quiere desplegar un mernu con los filtros a escoger\n");
@@ -332,9 +397,9 @@ void * busquedaVuelos(List *listaVuelos){
         while(opcion != 0){
 
             printf("---------Opciones--------\n");
-            printf("1. Empresa\n");
-            printf("2. Precio\n");
-            printf("3. Hora\n");
+            printf("1. Por empresa\n");
+            printf("2. Por rangos de precio\n");
+            printf("3. Por rangos de hora\n");
             printf("0. Salir\n");
 
             scanf("%i", &opcion);
@@ -342,27 +407,30 @@ void * busquedaVuelos(List *listaVuelos){
                 case 1: 
                     cont = 1;
                     
-                    L = firstList(listaVuelos);
+                    L = firstMap(mapaVuelos);
                     printf("Segun que empresa desea su vuelo: ");
                     char * empresa = (char*) malloc(40*sizeof(char));
                     scanf(" %[^\n]s]", empresa);
 
                     while(L != NULL){
-                        
-                        if(strcmp(L->empresa,empresa)==0){
-                            if(strcmp(L->ciudad,destiny)==0){
-                                printf("(%i) Empresa: %s\n", cont, L->empresa);
-                                cont++;
+                        vuelo * vueloski = (vuelo*)malloc(sizeof(vuelo));
+                        vueloski = firstList(L);
+                        while(vueloski!= NULL){
+                            if(strcmp(vueloski->empresa,empresa)==0){
+                                if(strcmp(vueloski->ciudad,destiny)==0){
+                                    printf("(%i) Empresa: %s || Pais: %s || Ciudad: %s || Precio: %i || Asientos Ocupados: %hu || Asientos Totales: %hu || Hora: %.2lf ||\n",cont,vueloski->empresa,vueloski->pais,vueloski->ciudad,vueloski->precio,vueloski->infoAvion->asientosOcupados,vueloski->infoAvion->asientosTotales, vueloski->hora);
+                                    cont++;
+                                }
                             }
+                            vueloski = nextList(L);
                         }
-                        L = nextList(listaVuelos); 
-
+                        L = nextMap(mapaVuelos); 
                     }
                     break;
                 
                 case 2:
+                    
                     cont = 1;
-
                     printf("Ingrese rango de precio\n");
                     printf("Ingrese el rango minimo: ");
                     int rangoUno;
@@ -371,19 +439,23 @@ void * busquedaVuelos(List *listaVuelos){
                     int rangoDos;
                     scanf("%i", &rangoDos);
                     
-                    L = firstList(listaVuelos);
+                    L = firstMap(mapaVuelos);
 
                     while(L != NULL){
-                        
-                        if(strcmp(L->ciudad,destiny)==0){
-                            if(L->precio >= rangoUno && L->precio <= rangoDos){
-                                printf("(%i) Empresa: %s || Pais: %s || Ciudad: %s || Precio: %i || Asientos Ocupados: %hu || Asientos Totales: %hu || Hora: %.2lf \n",cont,L->empresa,L->pais,L->ciudad,L->precio,L->infoAvion->asientosOcupados,L->infoAvion->asientosTotales, L->hora);
-                                cont++;
+                        vuelo * vueloski = (vuelo*)malloc(sizeof(vuelo));
+                        vueloski = firstList(L);
+                        while(vueloski!= NULL){
+                            if(strcmp(vueloski->ciudad,destiny)==0){
+                                if(vueloski->precio >= rangoUno && vueloski->precio <= rangoDos){
+                                    printf("(%i) Empresa: %s || Pais: %s || Ciudad: %s || Precio: %i || Asientos Ocupados: %hu || Asientos Totales: %hu || Hora: %.2lf ||\n",cont,vueloski->empresa,vueloski->pais,vueloski->ciudad,vueloski->precio,vueloski->infoAvion->asientosOcupados,vueloski->infoAvion->asientosTotales, vueloski->hora);
+                                    cont++;
+                                }
                             }
+                            vueloski = nextList(L);
                         }
-                        L = nextList(listaVuelos); 
+                        L = nextMap(mapaVuelos); 
                     }
-
+                    
                 break;
 
                 case 3:
@@ -396,27 +468,31 @@ void * busquedaVuelos(List *listaVuelos){
                     double horaDos;
                     scanf("%lf", &horaDos);
                     
-                    L = firstList(listaVuelos);
+                    L = firstMap(mapaVuelos);
 
                     while(L != NULL){
-                        
-                        if(strcmp(L->ciudad,destiny) == 0){
-                            if(L->hora >= horaUno && L->hora <= horaDos){
-                                printf("(%i) Empresa: %s || Pais: %s || Ciudad: %s || Precio: %i || Asientos Ocupados: %hu || Asientos Totales: %hu || Hora: %.2lf \n",cont,L->empresa,L->pais,L->ciudad,L->precio,L->infoAvion->asientosOcupados,L->infoAvion->asientosTotales, L->hora);
-                                cont++;
+                        vuelo * vueloski = (vuelo*)malloc(sizeof(vuelo));
+                        vueloski = firstList(L);
+                        while(vueloski!= NULL){
+                            if(strcmp(vueloski->ciudad,destiny)==0){
+                                if(vueloski->hora >= horaUno && vueloski->hora <= horaDos){
+                                    printf("(%i) Empresa: %s || Pais: %s || Ciudad: %s || Precio: %i || Asientos Ocupados: %hu || Asientos Totales: %hu || Hora: %.2lf ||\n",cont,vueloski->empresa,vueloski->pais,vueloski->ciudad,vueloski->precio,vueloski->infoAvion->asientosOcupados,vueloski->infoAvion->asientosTotales, vueloski->hora);
+                                    cont++;
+                                }
                             }
+                            vueloski = nextList(L);
                         }
-                        L = nextList(listaVuelos); 
+                        L = nextMap(mapaVuelos); 
                     }
-
                 break;
 
             }
         }        
     }
+    
 }
 
-void * estadoVuelos(List *listaPasajes){
+void * estadoVuelos(List *ListaPasajes){
     
 }
 
@@ -424,23 +500,32 @@ void * revisarPasaje(List *listaPasajes){
     
 }
 
-void * ofertasAplicadas(List*listaVuelos){
+void * ofertasAplicadas(Map * mapaVuelos){
 
-    ofertaVuelo* ofertitas = (ofertaVuelo*)malloc(sizeof(ofertaVuelo));
-    // mostrar todas las ofertas con los datos de la struct ofertas 
-    vuelo * L = (vuelo*)malloc(sizeof(vuelo));
-    L = firstList(listaVuelos);
+    List * L;
+    L = firstMap(mapaVuelos);
     int cont=1;
-    while(L!= NULL){
-
-        if(L->ofertaAplicada == true){
-            printf("(%i) Empresa: %s || Pais: %s || Ciudad: %s || Precio: %i || Asientos Ocupados: %hu || Asientos Totales: %hu || Hora: %.2lf \n",cont,L->empresa,L->pais,L->ciudad,L->precio,L->infoAvion->asientosOcupados,L->infoAvion->asientosTotales, L->hora);
-            cont++;
+    while(L != NULL){
+        vuelo * vueloski = (vuelo*)malloc(sizeof(vuelo));
+        vueloski = firstList(L);
+        while(vueloski!=NULL){
+            if(vueloski->ofertaAplicada == true){
+                printf("(%i) Empresa: %s || Pais: %s || Ciudad: %s || Precio: %i || Asientos Ocupados: %hu || Asientos Totales: %hu || Hora: %.2lf ||\n",cont,vueloski->empresa,vueloski->pais,vueloski->ciudad,vueloski->precio,vueloski->infoAvion->asientosOcupados,vueloski->infoAvion->asientosTotales, vueloski->hora);
+                cont++;
+            }
+            vueloski = nextList(L);
         }
-        L = nextList(listaVuelos);
+        
+        L = nextMap(mapaVuelos);
     }
-
+    
+    horaGeneral= horaGeneral + 0.5;
+    printf("HoraGeneral antes de funcion: %.2lf\n",horaGeneral);
+    revisionHoraAvion(horaGeneral,mapaVuelos);
 }
+
+/*
 void * modificarVuelos(List * listaVuelos){
 
 }
+*/
