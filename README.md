@@ -1,18 +1,10 @@
 # proyectoAeropuerto
 Proyecto Estructura de Datos
 
-////////////////////
-Explicacion Horas:
-
-Se van a tomar los numeros del 1 al 24, siendo 1-12 los AM y 13-24 los PM
-
-Para mostrar los minutos se toma en cuenta un decimal despues del numero
-Ejemplo: 13,4 = 13:40 PM ||| 23,1 = 23:10 PM ||| 9,3 = 09:30 PM.
-
-Se tiene una variable entera que funciona de forma global, que aumentará 0,3 cuando se salga de una funcion,
-para simular que el tiempo pasa cuando se realizan acciones.
-Si el valor decimal es igual a ".60",se le va a aumentar el valor en 1 y eliminar el valor decimal.
-////////////////////
+COSAS QUE HACER Y ARREGLAR:
+-Mejorar printeos.
+-Cambiar nombres variables.
+-Cambiar ciclos para buscar dentro del mapa.
 
 ////////////////////
 
@@ -38,4 +30,4 @@ AVION DE 80
 [][][][][][][][][][] [][][][][][][][][][]
 [][][][][][][][][][] [][][][][][][][][][]
 
-[][][][][][][][][][] [][][][][][][][][][]
+[][][][][][][][][][] [][][][][][][][][][
