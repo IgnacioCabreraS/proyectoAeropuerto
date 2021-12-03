@@ -684,26 +684,22 @@ void * busquedaVuelos(Map *mapaVuelos){
     
     printf("Ingrese el destino deseado:");
     char * destiny = (char*) malloc(40*sizeof(char));
-    
+    int cont=1;
     scanf(" %[^\n]s]", destiny);
     List * L;
-    L = firstMap(mapaVuelos);
-    int cont=1;
+    L = searchMap(mapaVuelos,destiny);
 
     printf("VUELOS ENCONTRADOS:\n");
-    while(L != NULL){
-        vuelo * vueloski = (vuelo*)malloc(sizeof(vuelo));
-        vueloski = firstList(L);
-        while(vueloski!=NULL){
-            if(strcmp(vueloski->ciudad,destiny)==0){
-                printf("(%i) Empresa: %s || Pais: %s || Ciudad: %s || Precio: %i || Asientos Ocupados: %hu || Asientos Totales: %hu || Hora: %d ||\n",cont,vueloski->empresa,vueloski->pais,vueloski->ciudad,vueloski->precio,vueloski->infoAvion->asientosOcupados,vueloski->infoAvion->asientosTotales, vueloski->hora);
-                cont++;
-            }
-            vueloski = nextList(L);
+
+    vuelo * vueloski = (vuelo*)malloc(sizeof(vuelo));
+    vueloski = firstList(L);
+    while(vueloski!=NULL){
+        if(strcmp(vueloski->ciudad,destiny)==0){
+            printf("(%i) Empresa: %s || Pais: %s || Ciudad: %s || Precio: %i || Asientos Ocupados: %hu || Asientos Totales: %hu || Hora: %d ||\n",cont,vueloski->empresa,vueloski->pais,vueloski->ciudad,vueloski->precio,vueloski->infoAvion->asientosOcupados,vueloski->infoAvion->asientosTotales, vueloski->hora);
+            cont++;
         }
-        
-        L = nextMap(mapaVuelos); 
-    }
+         vueloski = nextList(L);
+    } 
     
     // -----------FILTROS------------
     printf("Desea filtrar su busqueda?\n");
@@ -727,27 +723,22 @@ void * busquedaVuelos(Map *mapaVuelos){
             switch (opcion){
                 case 1: 
                     cont = 1;
-                    
-                    L = firstMap(mapaVuelos);
                     printf("Segun que empresa desea su vuelo: ");
                     char * empresa = (char*) malloc(40*sizeof(char));
                     scanf(" %[^\n]s]", empresa);
+                    vueloski = firstList(L);
 
-                    while(L != NULL){
-                        vuelo * vueloski = (vuelo*)malloc(sizeof(vuelo));
-                        vueloski = firstList(L);
-                        while(vueloski!= NULL){
-                            if(strcmp(vueloski->empresa,empresa)==0){
-                                if(strcmp(vueloski->ciudad,destiny)==0){
-                                    printf("(%i) Empresa: %s || Pais: %s || Ciudad: %s || Precio: %i || Asientos Ocupados: %hu || Asientos Totales: %hu || Hora: %.2lf ||\n",cont,vueloski->empresa,vueloski->pais,vueloski->ciudad,vueloski->precio,vueloski->infoAvion->asientosOcupados,vueloski->infoAvion->asientosTotales, vueloski->hora);
-                                    cont++;
-                                }
+                    while(vueloski != NULL){
+                        if(strcmp(vueloski->empresa,empresa) == 0){
+                            if(vueloski->habilitado == true){
+                                printf("(%i) Empresa: %s || Pais: %s || Ciudad: %s || Precio: %i || Asientos Ocupados: %hu || Asientos Totales: %hu || Hora: %.2lf ||\n",cont,vueloski->empresa,vueloski->pais,vueloski->ciudad,vueloski->precio,vueloski->infoAvion->asientosOcupados,vueloski->infoAvion->asientosTotales, vueloski->hora);
+                                cont++;
                             }
-                            vueloski = nextList(L);
                         }
-                        L = nextMap(mapaVuelos); 
+                        vueloski = nextList(L);
                     }
-                    break;
+
+                break;
                 
                 case 2:
                     
@@ -759,22 +750,16 @@ void * busquedaVuelos(Map *mapaVuelos){
                     printf("Ingrese el rango maximo: ");
                     int rangoDos;
                     scanf("%i", &rangoDos);
-                    
-                    L = firstMap(mapaVuelos);
+                    vueloski = firstList(L);
 
-                    while(L != NULL){
-                        vuelo * vueloski = (vuelo*)malloc(sizeof(vuelo));
-                        vueloski = firstList(L);
-                        while(vueloski!= NULL){
-                            if(strcmp(vueloski->ciudad,destiny)==0){
-                                if(vueloski->precio >= rangoUno && vueloski->precio <= rangoDos){
-                                    printf("(%i) Empresa: %s || Pais: %s || Ciudad: %s || Precio: %i || Asientos Ocupados: %hu || Asientos Totales: %hu || Hora: %.2lf ||\n",cont,vueloski->empresa,vueloski->pais,vueloski->ciudad,vueloski->precio,vueloski->infoAvion->asientosOcupados,vueloski->infoAvion->asientosTotales, vueloski->hora);
-                                    cont++;
-                                }
+                    while(vueloski != NULL){
+                        if(vueloski->precio >= rangoUno && vueloski->precio <= rangoDos){
+                            if(vueloski->habilitado == true){
+                                printf("(%i) Empresa: %s || Pais: %s || Ciudad: %s || Precio: %i || Asientos Ocupados: %hu || Asientos Totales: %hu || Hora: %.2lf ||\n",cont,vueloski->empresa,vueloski->pais,vueloski->ciudad,vueloski->precio,vueloski->infoAvion->asientosOcupados,vueloski->infoAvion->asientosTotales, vueloski->hora);
+                                cont++;
                             }
-                            vueloski = nextList(L);
                         }
-                        L = nextMap(mapaVuelos); 
+                        vueloski = nextList(L);
                     }
                     
                 break;
@@ -788,25 +773,18 @@ void * busquedaVuelos(Map *mapaVuelos){
                     printf("Ingrese hora maxima: ");
                     double horaDos;
                     scanf("%lf", &horaDos);
-                    
-                    L = firstMap(mapaVuelos);
+                    vueloski = firstList(L);
 
-                    while(L != NULL){
-                        vuelo * vueloski = (vuelo*)malloc(sizeof(vuelo));
-                        vueloski = firstList(L);
-                        while(vueloski!= NULL){
-                            if(strcmp(vueloski->ciudad,destiny)==0){
-                                if(vueloski->hora >= horaUno && vueloski->hora <= horaDos){
-                                    printf("(%i) Empresa: %s || Pais: %s || Ciudad: %s || Precio: %i || Asientos Ocupados: %hu || Asientos Totales: %hu || Hora: %.2lf ||\n",cont,vueloski->empresa,vueloski->pais,vueloski->ciudad,vueloski->precio,vueloski->infoAvion->asientosOcupados,vueloski->infoAvion->asientosTotales, vueloski->hora);
-                                    cont++;
-                                }
+                    while(vueloski != NULL){
+                        if(vueloski->hora >= horaUno && vueloski->hora <= horaDos){
+                            if(vueloski->habilitado == true){
+                                printf("(%i) Empresa: %s || Pais: %s || Ciudad: %s || Precio: %i || Asientos Ocupados: %hu || Asientos Totales: %hu || Hora: %.2lf ||\n",cont,vueloski->empresa,vueloski->pais,vueloski->ciudad,vueloski->precio,vueloski->infoAvion->asientosOcupados,vueloski->infoAvion->asientosTotales, vueloski->hora);
+                                cont++;
                             }
-                            vueloski = nextList(L);
                         }
-                        L = nextMap(mapaVuelos); 
+                        vueloski = nextList(L);
                     }
                 break;
-
             }
         }        
     }
