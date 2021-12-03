@@ -5,14 +5,16 @@
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <time.h>
 #include "list.h"
 #include "map.h"
 
 double horaGeneral = 0;
 
 typedef struct{
-    unsigned asientosOcupados;
-    unsigned asientosTotales;
+    int asientosOcupados;
+    int asientosTotales;
+    int asientos[50][50];
 }avion;
 
 typedef struct{
@@ -39,6 +41,8 @@ int isEqualString(void * key1, void * key2);
 char*get_csv_field (char * tmp, int k);
 Map* importarVuelos(Map * mapaVuelos);
 Map* importarOfertas(Map* mapaVuelos);
+void*creacionAviones(Map * mapaVuelos);
+void* poblarAvion(Map* mapaVuelos);
 void* modoPasajero(Map* mapaVuelos, List* listaPasajes);
 void* modoAdministrador(Map* mapaVuelos, List* listaPasajes);
 void* revisionHoraAvion(double horaGeneral, Map* mapaVuelos);
@@ -54,8 +58,11 @@ int main (){
 
     Map* mapaVuelos = createMap(isEqualString);
     List* listaPasajes = createList();
+    List*aviones = createList();
     importarVuelos(mapaVuelos);
     importarOfertas(mapaVuelos);
+    creacionAviones(mapaVuelos);
+    poblarAvion(mapaVuelos);
     
     int opcion=1;
     while(opcion!=0){
@@ -150,6 +157,257 @@ char * get_csv_field (char * tmp, int k){
     return NULL;
 }
 
+
+
+void*creacionAviones(Map * mapaVuelos){
+    List * L;
+    L = firstMap(mapaVuelos);
+    while(L != NULL){
+        vuelo * vueloski = (vuelo*)malloc(sizeof(vuelo));
+        vueloski = firstList(L);
+        while(vueloski!=NULL){
+            
+            if(vueloski->infoAvion->asientosTotales == 100){
+                //printf("A\n");
+                //FORMA AVION PARA 100 PAJEROS 
+                
+                int i,j;
+
+                for(i=0;i<20;i++){ 
+                    vueloski->infoAvion->asientos[0][i]=3;
+                    //printf("3 ");
+                }
+                //printf("\n");
+                
+                for(i=0;i<30;i++){ 
+                    vueloski->infoAvion->asientos[1][i]=3;
+                    //printf("3 ");
+                }
+                //printf("\n");
+                for(i=0;i<30;i++){
+                    vueloski->infoAvion->asientos[2][i]=3;
+                    //printf("3 ");
+                }
+                //printf("\n");
+                for(i=0;i<20;i++){  
+                    vueloski->infoAvion->asientos[3][i]=3;
+                    //printf("3 ");
+                }
+
+                //printf("\n");
+                //printf("Prinfteo de matriz\n");
+
+                for(i=0; i < 4; i++){
+                    if(i == 0){
+                        for(j = 0; j < 20; j++){
+                            if(vueloski->infoAvion->asientos[i][j] == 3){
+                                //printf("[%d] ",vueloski->infoAvion->asientos[i][j]);
+                            }
+                        }
+                    }
+                    if(i == 1){
+                        for(j = 0; j < 30; j++){
+                            if(vueloski->infoAvion->asientos[i][j] == 3){
+                                //printf("[%d] ",vueloski->infoAvion->asientos[i][j]);
+                            }
+                        }
+                    }
+                    if(i == 2){
+                        for(j = 0; j < 30; j++){
+                            if(vueloski->infoAvion->asientos[i][j] == 3){
+                                //printf("[%d] ",vueloski->infoAvion->asientos[i][j]);
+                            }
+                        }
+                    }
+                    if(i == 3){
+                        for(j = 0; j < 20; j++){
+                            if(vueloski->infoAvion->asientos[i][j] == 3){
+                                //printf("[%d] ",vueloski->infoAvion->asientos[i][j]);
+                            }
+                        }
+                    }
+                    //printf("\n");
+                }
+                
+                
+               
+            }
+            
+            if(vueloski->infoAvion->asientosTotales == 90){
+                //FORMA AVION PARA 90 PASAJEROS
+                //printf("B\n");
+                int matriz2[50][50];
+                int k,l;
+
+                for(k=0;k<3;k++){
+                    for(l = 0 ; l < 30; l++){
+                        vueloski->infoAvion->asientos[k][l]=3;
+                        //printf("3 ");
+                    } 
+                    //printf("\n");
+                }
+
+                //printf("Prinfteo de matriz\n");
+
+                for(k=0;k < 3; k++){
+                    for(l = 0; l < 30; l++){
+                        if(vueloski->infoAvion->asientos[k][l] == 3){
+                            //printf("[%d] ",vueloski->infoAvion->asientos[k][l]);
+                        }
+                    }
+                    //printf("\n");
+                }
+            }
+
+            if(vueloski->infoAvion->asientosTotales == 80){
+                //FORMA AVION PARA 80 PASAJEROS
+                //printf("C\n");
+                int matriz3[50][50];
+                int m,n;
+
+                for(m=0;m<4;m++){
+                    for(n = 0 ; n < 20; n++){
+                        vueloski->infoAvion->asientos[m][n]=3;
+                        //printf("3 ");
+                    } 
+                    //printf("\n");
+                }
+
+                //printf("Prinfteo de matriz\n");
+
+                for(m=0;m < 4; m++){
+                    for(n = 0; n < 20; n++){
+                        if(vueloski->infoAvion->asientos[m][n] == 3){
+                            //printf("[%d] ",vueloski->infoAvion->asientos[m][n]);
+                        }
+                    }
+                    //printf("\n");
+                }
+            }
+            
+            vueloski = nextList(L);
+        }
+        L = nextMap(mapaVuelos);
+    }
+}
+
+void* poblarAvion(Map* mapaVuelos){
+
+    srand(time(NULL));
+    List * L;
+    int i,j;
+    int numeroRandom;
+    int contAsientosTomados=0;
+
+    L = firstMap(mapaVuelos);
+    while(L != NULL){
+        vuelo * vueloski = (vuelo*)malloc(sizeof(vuelo));
+        vueloski = firstList(L);
+        while(vueloski!=NULL){
+            printf("Nuevo avion\n");
+            if(vueloski->infoAvion->asientosTotales == 100){
+                
+                printf("Poblamos matriz\n");
+                contAsientosTomados=0;
+                for(i=0;i<20;i++){ 
+                    numeroRandom = rand()%2;
+                    vueloski->infoAvion->asientos[0][i]=numeroRandom;
+                    printf("[%d] ",vueloski->infoAvion->asientos[0][i]);
+                    if(numeroRandom==1){
+                        contAsientosTomados++;
+                    }
+                    //printf("3 ");
+                }
+                printf("\n");
+                for(i=0;i<30;i++){ 
+                    numeroRandom = rand()%2;
+                    vueloski->infoAvion->asientos[1][i]=numeroRandom;
+                    printf("[%d] ",vueloski->infoAvion->asientos[1][i]);
+                    if(numeroRandom==1){
+                        contAsientosTomados++;
+                    }
+                    //printf("3 ");
+                }
+                printf("\n");
+                for(i=0;i<30;i++){
+                    numeroRandom = rand()%2;
+                    vueloski->infoAvion->asientos[2][i]=numeroRandom;
+                    printf("[%d] ",vueloski->infoAvion->asientos[2][i]);
+                    if(numeroRandom==1){
+                        contAsientosTomados++;
+                    }
+                    //printf("3 ");
+                }
+                printf("\n");
+                for(i=0;i<20;i++){  
+                    numeroRandom = rand()%2;
+                    vueloski->infoAvion->asientos[3][i]=numeroRandom;
+                    printf("[%d] ",vueloski->infoAvion->asientos[3][i]);
+                    if(numeroRandom==1){
+                        contAsientosTomados++;
+                    }
+                    //printf("3 ");
+                }
+
+                vueloski->infoAvion->asientosOcupados= contAsientosTomados;
+                printf("\n");
+                printf("Asientos ocupados despues de randomizacion: %d\n",contAsientosTomados);
+
+            }
+
+            if(vueloski->infoAvion->asientosTotales == 90){
+                
+                contAsientosTomados=0;
+                for(i=0;i<3;i++){
+                    for(j = 0 ; j < 30; j++){
+                        numeroRandom = rand()%2;
+                        vueloski->infoAvion->asientos[i][j]=numeroRandom;
+                        printf("[%d] ",vueloski->infoAvion->asientos[i][j]);
+                        if(numeroRandom==1){
+                            contAsientosTomados++;
+                        }
+                        //printf("3 ");
+                    } 
+                    printf("\n");
+                }
+
+                vueloski->infoAvion->asientosOcupados= contAsientosTomados;
+                printf("\n");
+                printf("Asientos ocupados despues de randomizacion: %d\n",contAsientosTomados);
+
+            }
+
+            if(vueloski->infoAvion->asientosTotales == 80){
+                
+                contAsientosTomados=0;
+                for(i=0;i<4;i++){
+                    for(j = 0 ; j < 20; j++){
+                        numeroRandom = rand()%2;
+                        vueloski->infoAvion->asientos[i][j]=numeroRandom;
+                        printf("[%d] ",vueloski->infoAvion->asientos[i][j]);
+                        if(numeroRandom==1){
+                            contAsientosTomados++;
+                        }
+                        //printf("3 ");
+                    } 
+                    printf("\n");
+                    
+                }
+
+                vueloski->infoAvion->asientosOcupados= contAsientosTomados;
+                printf("\n");
+                printf("Asientos ocupados despues de randomizacion: %d\n",contAsientosTomados);
+
+            }
+            
+            vueloski = nextList(L);
+        }  
+        L = nextMap(mapaVuelos); 
+    }
+
+    printf("\n");
+}
+
 void* revisionHoraAvion(double horaGeneral,Map* mapaVuelos){
 
     if(horaGeneral == 24){
@@ -165,8 +423,6 @@ void* revisionHoraAvion(double horaGeneral,Map* mapaVuelos){
        auxHoraG=auxHoraG-0.2;
        printf("HoraG: %lf\n",auxHoraG);
     }
-
-    
 
     List * L;
     L = firstMap(mapaVuelos);
@@ -231,15 +487,17 @@ Map * importarVuelos(Map * mapaVuelos){
             if(i == 3){
                 vueloC->precio = atoi(aux);
             }
-
+            
+            /*
             if(i == 4){
                 avionC->asientosOcupados = atoi(aux);
             }
+            */
 
-            if(i == 5){
+            if(i == 4){
                 avionC->asientosTotales = atoi(aux);
             }
-            if(i == 6){
+            if(i == 5){
                 vueloC->hora = atof(aux);
             }
 
