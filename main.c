@@ -20,6 +20,7 @@ typedef struct{
     int asientosOcupados;
     int asientosTotales;
     int asientos[50][50];
+    int asientosComprados;
 }avion;
 
 typedef struct{
@@ -617,26 +618,18 @@ void * comprarPasaje(Map *mapaVuelos, List *listaPasajes){
     scanf(" %[^\n]s]", destiny);
     int cont = 0;
 
-    List * L;
-    L = firstMap(mapaVuelos);
+    List * L = (List*)searchMap(mapaVuelos,destiny);
+    vuelo * vueloski = (vuelo*)malloc(sizeof(vuelo));
+    
 
     // verificacion si hay aviones disponibles
     printf("VUELOS ENCONTRADOS:\n");
-    while(L != NULL){
-        vuelo * vueloski = (vuelo*)malloc(sizeof(vuelo));
-        vueloski = firstList(L);
-        while(vueloski!=NULL){
-            if(strcmp(vueloski->ciudad,destiny)==0){
-                if(vueloski->habilitado == true){
-                    cont++;
-                    printf("(%i) Empresa: %s || Pais: %s || Ciudad: %s || Precio: %i || Asientos Ocupados: %hu || Asientos Totales: %hu || Hora: %.2lf ||\n",cont,vueloski->empresa,vueloski->pais,vueloski->ciudad,vueloski->precio,vueloski->infoAvion->asientosOcupados,vueloski->infoAvion->asientosTotales, vueloski->hora);
-                    
-                }
-            }
-            vueloski = nextList(L);
+    while(vueloski!=NULL){
+        if(vueloski->habilitado == true){
+            cont++;
+            printf("(%i) Empresa: %s || Pais: %s || Ciudad: %s || Precio: %i || Asientos Ocupados: %hu || Asientos Totales: %hu || Hora: %.2lf ||\n",cont,vueloski->empresa,vueloski->pais,vueloski->ciudad,vueloski->precio,vueloski->infoAvion->asientosOcupados,vueloski->infoAvion->asientosTotales, vueloski->hora);     
         }
-        
-        L = nextMap(mapaVuelos); 
+        vueloski = nextList(L);
     }
 
     int eleccion;
@@ -646,42 +639,45 @@ void * comprarPasaje(Map *mapaVuelos, List *listaPasajes){
         scanf("%i", &eleccion);
     }while(eleccion <= 0 || eleccion > cont);
     
-    L = firstMap(mapaVuelos);
-
+    vueloski = firstList(L);
     cont=1;
     
-    while(L != NULL){
-        vuelo * vueloski = (vuelo*)malloc(sizeof(vuelo));
-        vueloski = firstList(L);
-        while(vueloski!=NULL){
-            if(strcmp(vueloski->ciudad,destiny)==0){
-                if(vueloski->habilitado == true){
-                    if(eleccion == cont){
-                        printf("(%i) Empresa: %s || Pais: %s || Ciudad: %s || Precio: %i || Asientos Ocupados: %hu || Asientos Totales: %hu || Hora: %.2lf ||\n",cont,vueloski->empresa,vueloski->pais,vueloski->ciudad,vueloski->precio,vueloski->infoAvion->asientosOcupados,vueloski->infoAvion->asientosTotales, vueloski->hora);
-                        int pago;
-                        do{
-                            printf("Pague su pasaje: ");
-                            scanf("%i",&pago);
-                        }while(pago < vueloski->precio);
+    
+    while(vueloski!=NULL){
+        if(strcmp(vueloski->ciudad,destiny)==0){
+            
+            if(eleccion == cont){
+                printf("(%i) Empresa: %s || Pais: %s || Ciudad: %s || Precio: %i || Asientos Ocupados: %hu || Asientos Totales: %hu || Hora: %.2lf ||\n",cont,vueloski->empresa,vueloski->pais,vueloski->ciudad,vueloski->precio,vueloski->infoAvion->asientosOcupados,vueloski->infoAvion->asientosTotales, vueloski->hora);
+                    
+                int pasajesCompra;
+                do{
+                    printf("Cuantos pasajes desea comprar: ");
+                    scanf("%d",pasajesCompra);
+                }while(pasajesCompra+vueloski->infoAvion->asientosOcupados < vueloski->infoAvion->asientosTotales);
 
-                        if(pago>vueloski->precio){
-                            printf("Vuelo pagado. Su vuelto es de: %d\n",pago-vueloski->precio);
-                        }
+                int pago;
+                do{
+                    printf("Pague su pasaje: ");
+                    scanf("%i",&pago);
+                }while(pago < vueloski->precio*pasajesCompra);
 
-                        if(pago==vueloski->precio){
-                            printf("Vuelo pagado.\n");
-                        }
-
-                        pushBack(listaPasajes,vueloski);
-                    }
-                    cont++; 
+                if(pago>vueloski->precio*pasajesCompra){
+                    printf("Vuelo pagado. Su vuelto es de: %d\n",pago-vueloski->precio*pasajesCompra);
                 }
+
+                if(pago==vueloski->precio*pasajesCompra){
+                    printf("Vuelo pagado.\n");
+                }
+
+                pushBack(listaPasajes,vueloski);
             }
-            vueloski = nextList(L);
+            cont++; 
         }
-        
-        L = nextMap(mapaVuelos); 
+        vueloski = nextList(L);
     }
+
+    // ASIENTOS
+    
 }
 
 void * busquedaVuelos(Map *mapaVuelos){
