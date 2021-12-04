@@ -12,6 +12,7 @@
 
 #define ROJO_F "\e[41m"
 #define VERDE_F "\e[42m"
+#define AMARILLO_F "\e[43m"	
 #define RESET_COLOR "\e[0m"
 
 double horaGeneral = 0;
@@ -620,23 +621,28 @@ void * comprarPasaje(Map *mapaVuelos, List *listaPasajes){
 
     List * L = (List*)searchMap(mapaVuelos,destiny);
     vuelo * vueloski = (vuelo*)malloc(sizeof(vuelo));
+    vueloski = firstList(L);
     
 
     // verificacion si hay aviones disponibles
     printf("VUELOS ENCONTRADOS:\n");
     while(vueloski!=NULL){
         if(vueloski->habilitado == true){
-            cont++;
-            printf("(%i) Empresa: %s || Pais: %s || Ciudad: %s || Precio: %i || Asientos Ocupados: %hu || Asientos Totales: %hu || Hora: %.2lf ||\n",cont,vueloski->empresa,vueloski->pais,vueloski->ciudad,vueloski->precio,vueloski->infoAvion->asientosOcupados,vueloski->infoAvion->asientosTotales, vueloski->hora);     
+            if(vueloski->infoAvion->asientosComprados < 1){
+                cont++;
+                printf("(%i) Empresa: %s || Pais: %s || Ciudad: %s || Precio: %i || Asientos Ocupados: %hu || Asientos Totales: %hu || Hora: %.2lf ||\n",cont,vueloski->empresa,vueloski->pais,vueloski->ciudad,vueloski->precio,vueloski->infoAvion->asientosOcupados,vueloski->infoAvion->asientosTotales, vueloski->hora);
+            }
+                 
         }
         vueloski = nextList(L);
     }
 
     int eleccion;
-    
+    int contador;
+    int i,j;
     do{
         printf("Ingrese el numero del vuelo deseado: ");
-        scanf("%i", &eleccion);
+        scanf("%d", &eleccion);
     }while(eleccion <= 0 || eleccion > cont);
     
     vueloski = firstList(L);
@@ -646,19 +652,19 @@ void * comprarPasaje(Map *mapaVuelos, List *listaPasajes){
     while(vueloski!=NULL){
         if(strcmp(vueloski->ciudad,destiny)==0){
             
-            if(eleccion == cont){
+            if((eleccion == cont) && (vueloski->habilitado == true)){
                 printf("(%i) Empresa: %s || Pais: %s || Ciudad: %s || Precio: %i || Asientos Ocupados: %hu || Asientos Totales: %hu || Hora: %.2lf ||\n",cont,vueloski->empresa,vueloski->pais,vueloski->ciudad,vueloski->precio,vueloski->infoAvion->asientosOcupados,vueloski->infoAvion->asientosTotales, vueloski->hora);
                     
                 int pasajesCompra;
                 do{
                     printf("Cuantos pasajes desea comprar: ");
-                    scanf("%d",pasajesCompra);
-                }while(pasajesCompra+vueloski->infoAvion->asientosOcupados < vueloski->infoAvion->asientosTotales);
+                    scanf("%d",&pasajesCompra);
+                }while(pasajesCompra+vueloski->infoAvion->asientosOcupados > vueloski->infoAvion->asientosTotales);
 
                 int pago;
                 do{
                     printf("Pague su pasaje: ");
-                    scanf("%i",&pago);
+                    scanf("%d",&pago);
                 }while(pago < vueloski->precio*pasajesCompra);
 
                 if(pago>vueloski->precio*pasajesCompra){
@@ -669,15 +675,267 @@ void * comprarPasaje(Map *mapaVuelos, List *listaPasajes){
                     printf("Vuelo pagado.\n");
                 }
 
-                pushBack(listaPasajes,vueloski);
+                vueloski->infoAvion->asientosOcupados = vueloski->infoAvion->asientosOcupados+pasajesCompra;
+                vueloski->infoAvion->asientosComprados = pasajesCompra;
+                if(vueloski->infoAvion->asientosTotales == vueloski->infoAvion->asientosOcupados){
+                    vueloski->habilitado = false;
+                }
+
+                if(vueloski->infoAvion->asientosTotales == 100){
+
+                    printf("    [A] [B] [C] [D] [E] [F] [G] [H] [I] [J] [K] [L] [M] [N] [O] [P] [Q] [R] [S] [T] [U] [V] [W] [X] [Y] [Z][A0] [B0][C0][D0]\n");
+
+                    printf("[0] ");
+                    for(i=0;i<20;i++){
+                        if(vueloski->infoAvion->asientos[0][i] == 0){
+                            printf(VERDE_F "[%d] "RESET_COLOR,vueloski->infoAvion->asientos[0][i]);
+                        }else{
+                            printf(ROJO_F "[%d] "RESET_COLOR,vueloski->infoAvion->asientos[0][i]);
+                        }
+                    }
+                    printf("\n");
+
+                    printf("[1] ");
+                    for(i=0;i<30;i++){ 
+                        if(vueloski->infoAvion->asientos[1][i] == 0){
+                            printf(VERDE_F "[%d] "RESET_COLOR,vueloski->infoAvion->asientos[1][i]);
+                        }else{
+                            printf(ROJO_F "[%d] "RESET_COLOR,vueloski->infoAvion->asientos[1][i]);
+                        }
+                    }
+                    printf("\n");
+
+                    printf("[2] ");
+                    for(i=0;i<30;i++){
+                        if(vueloski->infoAvion->asientos[2][i] == 0){
+                            printf(VERDE_F "[%d] "RESET_COLOR,vueloski->infoAvion->asientos[2][i]);
+                        }else{
+                            printf(ROJO_F "[%d] "RESET_COLOR,vueloski->infoAvion->asientos[2][i]);
+                        }
+                    }
+                    printf("\n");
+                    
+                    printf("[3] ");
+                    for(i=0;i<20;i++){
+                        if(vueloski->infoAvion->asientos[3][i] == 0){
+                            printf(VERDE_F "[%d] "RESET_COLOR,vueloski->infoAvion->asientos[3][i]);
+                        }else{
+                            printf(ROJO_F "[%d] "RESET_COLOR,vueloski->infoAvion->asientos[3][i]);
+                        }
+                    }
+                    printf("\n");
+
+                    contador = 0;
+
+                    printf("Seleccione el/los asientos a comprar que fueron mostrados anteriormente\n");
+                    printf("RECORDATORIO: 1 = OCUPADO y 0 = DISPONIBLE\n");
+
+                    do{
+                        
+                        int x,y;
+
+                        printf("Seleccione coordenada X de pasaje numero %d: ",contador);
+                        scanf("%d",&x);
+                        printf("Seleccione coordenada Y de pasaje numero %d: ",contador);
+                        scanf("%d",&y);
+
+                        if(vueloski->infoAvion->asientos[x][y] ==  0){
+                            printf("Asiento agregado correctamente.\n");
+                            vueloski->infoAvion->asientos[x][y] = 2;
+                            contador++;
+                        }
+
+                        if(vueloski->infoAvion->asientos[x][y] ==  1){
+                            printf("Asiento ya esta ocupado.\n");
+                        }
+
+    
+                    }while(contador != pasajesCompra);
+
+                    for(i=0;i<20;i++){
+                        if(vueloski->infoAvion->asientos[0][i] == 0){
+                            printf(VERDE_F "[%d] "RESET_COLOR,vueloski->infoAvion->asientos[0][i]);
+                        }
+                        if(vueloski->infoAvion->asientos[0][i] == 1){
+                            printf(ROJO_F "[%d] "RESET_COLOR,vueloski->infoAvion->asientos[0][i]);
+                        }
+                        if(vueloski->infoAvion->asientos[0][i] == 2){
+                            printf(AMARILLO_F "[%d] "RESET_COLOR,vueloski->infoAvion->asientos[0][i]);
+                        }
+                    }
+                    printf("\n");
+
+                    
+                    for(i=0;i<30;i++){
+                        if(vueloski->infoAvion->asientos[1][i] == 0){
+                            printf(VERDE_F "[%d] "RESET_COLOR,vueloski->infoAvion->asientos[1][i]);
+                        }
+                        if(vueloski->infoAvion->asientos[1][i] == 1){
+                            printf(ROJO_F "[%d] "RESET_COLOR,vueloski->infoAvion->asientos[1][i]);
+                        }
+                        if(vueloski->infoAvion->asientos[1][i] == 2){
+                            printf(AMARILLO_F "[%d] "RESET_COLOR,vueloski->infoAvion->asientos[1][i]);
+                        }
+                    }
+                    printf("\n");
+
+                    
+                    for(i=0;i<30;i++){
+                        if(vueloski->infoAvion->asientos[2][i] == 0){
+                            printf(VERDE_F "[%d] "RESET_COLOR,vueloski->infoAvion->asientos[2][i]);
+                        }
+                        if(vueloski->infoAvion->asientos[2][i] == 1){
+                            printf(ROJO_F "[%d] "RESET_COLOR,vueloski->infoAvion->asientos[2][i]);
+                        }
+                        if(vueloski->infoAvion->asientos[2][i] == 2){
+                            printf(AMARILLO_F "[%d] "RESET_COLOR,vueloski->infoAvion->asientos[2][i]);
+                        }
+                    }
+                    printf("\n");
+                    
+                    
+                    for(i=0;i<20;i++){
+                        if(vueloski->infoAvion->asientos[3][i] == 0){
+                            printf(VERDE_F "[%d] "RESET_COLOR,vueloski->infoAvion->asientos[3][i]);
+                        }
+                        if(vueloski->infoAvion->asientos[3][i] == 1){
+                            printf(ROJO_F "[%d] "RESET_COLOR,vueloski->infoAvion->asientos[3][i]);
+                        }
+                        if(vueloski->infoAvion->asientos[3][i] == 2){
+                            printf(AMARILLO_F "[%d] "RESET_COLOR,vueloski->infoAvion->asientos[3][i]);
+                        }
+                    }
+                    printf("\n");
+
+                }
+
+                if(vueloski->infoAvion->asientosTotales == 90){
+
+                    printf("    [A] [B] [C] [D] [E] [F] [G] [H] [I] [J] [K] [L] [M] [N] [O] [P] [Q] [R] [S] [T] [U] [V] [W] [X] [Y] [Z] [A0][B0][C0][D0]\n");
+
+                    for(i=0;i<3;i++){
+                        printf("[%d] ",i);
+                        for(j = 0 ; j < 30; j++){
+                            if(vueloski->infoAvion->asientos[i][j] == 0){
+                                printf(VERDE_F "[%d] "RESET_COLOR,vueloski->infoAvion->asientos[i][j]);
+                            }else{
+                                printf(ROJO_F "[%d] "RESET_COLOR,vueloski->infoAvion->asientos[i][j]);
+                            }
+                        } 
+                        printf("\n");
+                    } 
+
+                    contador = 0;
+
+                    printf("Seleccione el/los asientos a comprar que fueron mostrados anteriormente\n");
+                    printf("RECORDATORIO: 1 = OCUPADO y 0 = DISPONIBLE\n");
+
+                    do{
+                        
+                        int x,y;
+
+                        printf("Seleccione coordenada X de pasaje numero %d: ",contador);
+                        scanf("%d",&x);
+                        printf("Seleccione coordenada Y de pasaje numero %d: ",contador);
+                        scanf("%d",&y);
+
+                        if(vueloski->infoAvion->asientos[x][y] ==  0){
+                            printf("Asiento agregado correctamente.\n");
+                            vueloski->infoAvion->asientos[x][y] = 2;
+                            contador++;
+                        }
+
+                        if(vueloski->infoAvion->asientos[x][y] ==  1){
+                            printf("Asiento ya esta ocupado.\n");
+                        }
+
+    
+                    }while(contador != pasajesCompra);
+
+                    for(i=0;i<3;i++){
+                        for(j = 0 ; j < 30; j++){
+                            if(vueloski->infoAvion->asientos[i][j] == 0){
+                                printf(VERDE_F "[%d] "RESET_COLOR,vueloski->infoAvion->asientos[i][j]);
+                            }
+                            if(vueloski->infoAvion->asientos[i][j] == 1){
+                                printf(ROJO_F "[%d] "RESET_COLOR,vueloski->infoAvion->asientos[i][j]);
+                            }
+                            if(vueloski->infoAvion->asientos[i][j] == 2){
+                                printf(AMARILLO_F "[%d] "RESET_COLOR,vueloski->infoAvion->asientos[i][j]);
+                            }
+
+                        } 
+                        printf("\n");
+                    } 
+
+                }
+                
+                
+                if(vueloski->infoAvion->asientosTotales == 80){
+
+                    printf("    [A] [B] [C] [D] [E] [F] [G] [H] [I] [J] [K] [L] [M] [N] [O] [P] [Q] [R] [S] [T]\n");
+
+                    for(i=0;i<4;i++){
+                        printf("[%d] ",i);
+                        for(j = 0 ; j < 20; j++){
+                            if(vueloski->infoAvion->asientos[i][j] == 0){
+                                printf(VERDE_F "[%d] "RESET_COLOR,vueloski->infoAvion->asientos[i][j]);
+                            }else{
+                                printf(ROJO_F "[%d] "RESET_COLOR,vueloski->infoAvion->asientos[i][j]);
+                            }
+                        } 
+                        printf("\n");
+                    }
+                    
+                    contador = 0;
+                    printf("Seleccione el/los asientos a comprar que fueron mostrados anteriormente\n");
+                    printf("RECORDATORIO: 1 = OCUPADO y 0 = DISPONIBLE\n");
+                    do{
+                        
+                        int x,y;
+
+                        printf("Seleccione coordenada X de pasaje numero %d: ",contador);
+                        scanf("%d",&x);
+                        printf("Seleccione coordenada Y de pasaje numero %d: ",contador);
+                        scanf("%d",&y);
+
+                        if(vueloski->infoAvion->asientos[x][y] ==  0){
+                            printf("Asiento agregado correctamente.\n");
+                            vueloski->infoAvion->asientos[x][y] = 2;
+                            contador++;
+                        }
+
+                        if(vueloski->infoAvion->asientos[x][y] ==  1){
+                            printf("Asiento ya esta ocupado.\n");
+                        }
+
+    
+                    }while(contador != pasajesCompra);
+
+                    for(i=0;i<4;i++){
+                        for(j = 0 ; j < 20; j++){
+                            if(vueloski->infoAvion->asientos[i][j] == 0){
+                                printf(VERDE_F "[%d] "RESET_COLOR,vueloski->infoAvion->asientos[i][j]);
+                            }
+                            if(vueloski->infoAvion->asientos[i][j] == 1){
+                                printf(ROJO_F "[%d] "RESET_COLOR,vueloski->infoAvion->asientos[i][j]);
+                            }
+                            if(vueloski->infoAvion->asientos[i][j] == 2){
+                                printf(AMARILLO_F "[%d] "RESET_COLOR,vueloski->infoAvion->asientos[i][j]);
+                            }
+
+                        } 
+                        printf("\n");
+                    } 
+                }
+                
+                pushBack(listaPasajes,vueloski);             
             }
             cont++; 
         }
         vueloski = nextList(L);
     }
 
-    // ASIENTOS
-    
 }
 
 void * busquedaVuelos(Map *mapaVuelos){

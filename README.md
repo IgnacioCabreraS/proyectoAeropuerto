@@ -4,7 +4,6 @@ Proyecto Estructura de Datos
 COSAS QUE HACER Y ARREGLAR:
 -Mejorar printeos.
 -Cambiar nombres variables.
--Cambiar ciclos para buscar dentro del mapa.
 
 ////////////////////
 
@@ -30,4 +29,4 @@ AVION DE 80
 [][][][][][][][][][] [][][][][][][][][][]
 [][][][][][][][][][] [][][][][][][][][][]
 
-[][][][][][][][][][] [][][][][][][][][][
+[][][][][][][][][][] [][][][][][][][][][]
