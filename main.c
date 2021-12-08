@@ -859,10 +859,7 @@ void * comprarPasaje(Map *mapaVuelos, List *listaPasajes){
                         scanf("%d",&y);
                     }while(y>20 || y<0);
                         
-                    printf("Seleccione coordenada X de pasaje numero %d: ",contador);
-                    scanf("%d",&x);
-                    printf("Seleccione coordenada Y de pasaje numero %d: ",contador);
-                    scanf("%d",&y);
+                    
 
                     if(vueloCompra->infoAvion->asientos[x][y] ==  0){
                         printf("Asiento agregado correctamente.\n");
@@ -924,6 +921,11 @@ void * busquedaVuelos(Map *mapaVuelos, List * listaPasajes){
     List * L = searchMap(mapaVuelos,destino);
     vuelo * vueloBusqueda = (vuelo*)malloc(sizeof(vuelo));
     vueloBusqueda = firstList(L);
+
+    if(vueloBusqueda == NULL){
+        printf("No existen vuelos con este destino.\n");
+        return 0;
+    }
 
     printf("                                                         _-VUELOS ENCONTRADOS-_                                                                     \n");
     printf(" ---------------------------------------------------------------------------------------------------------------------------------------------------\n");
@@ -1058,15 +1060,16 @@ void * consultaPasajes(Map* mapaVuelos,List *listaPasajes){
         return 0;
     }
 
-    int cont = 1;
+    int cont = 0;
     int i,j;
     printf("                                                       _-CONSULTA PASAJES-_                                                                     \n");
     printf(" ---------------------------------------------------------------------------------------------------------------------------------------------------\n");
     //Se recorre la lista de pasajes para mostrar todo lo comprado.
     vueloComprado = firstList(listaPasajes);
     while(vueloComprado != NULL){
-        printf("|| (%i) Empresa: %s || Pais: %s || Ciudad: %s || Precio: %i || Asientos Ocupados: %hu || Asientos Totales: %hu || Hora: %.2lf ||\n",cont,vueloComprado->empresa,vueloComprado->pais,vueloComprado->ciudad,vueloComprado->precio,vueloComprado->infoAvion->asientosOcupados,vueloComprado->infoAvion->asientosTotales, vueloComprado->hora);
         cont++;
+        printf("|| (%i) Empresa: %s || Pais: %s || Ciudad: %s || Precio: %i || Asientos Ocupados: %hu || Asientos Totales: %hu || Hora: %.2lf ||\n",cont,vueloComprado->empresa,vueloComprado->pais,vueloComprado->ciudad,vueloComprado->precio,vueloComprado->infoAvion->asientosOcupados,vueloComprado->infoAvion->asientosTotales, vueloComprado->hora);
+        
         vueloComprado = nextList(listaPasajes);
     }
     printf(" ---------------------------------------------------------------------------------------------------------------------------------------------------\n");
@@ -1079,7 +1082,7 @@ void * consultaPasajes(Map* mapaVuelos,List *listaPasajes){
     cont=1;
 
 
-    while(vueloComprado != NULL && eleccion == cont){
+    while(vueloComprado != NULL && eleccion != cont){
         
         int opcion = 1;
         while(opcion != 0){
@@ -1186,9 +1189,14 @@ void * consultaPasajes(Map* mapaVuelos,List *listaPasajes){
                             for(j = 0 ; j < 30; j++){
                                 if(vueloComprado->infoAvion->asientos[i][j] == 0){
                                     printf(VERDE_F "[%d] "RESET_COLOR,vueloComprado->infoAvion->asientos[i][j]);
-                                }else{
-                                    printf(ROJO_F "[%d] "RESET_COLOR,vueloComprado->infoAvion->asientos[i][j]);
                                 }
+                                if(vueloComprado->infoAvion->asientos[3][i] == 1){
+                                    printf(ROJO_F "[%d] "RESET_COLOR,vueloComprado->infoAvion->asientos[3][i]);
+                                }
+                                if(vueloComprado->infoAvion->asientos[3][i] == 2){
+                                    printf(AMARILLO_F "[%d] "RESET_COLOR,vueloComprado->infoAvion->asientos[3][i]);
+                                }
+
                             } 
                             printf("\n");
                         } 
@@ -1208,8 +1216,12 @@ void * consultaPasajes(Map* mapaVuelos,List *listaPasajes){
                             for(j = 0 ; j < 20; j++){
                                 if(vueloComprado->infoAvion->asientos[i][j] == 0){
                                     printf(VERDE_F "[%d] "RESET_COLOR,vueloComprado->infoAvion->asientos[i][j]);
-                                }else{
-                                    printf(ROJO_F "[%d] "RESET_COLOR,vueloComprado->infoAvion->asientos[i][j]);
+                                }
+                                if(vueloComprado->infoAvion->asientos[3][i] == 1){
+                                printf(ROJO_F "[%d] "RESET_COLOR,vueloComprado->infoAvion->asientos[3][i]);
+                                }
+                                if(vueloComprado->infoAvion->asientos[3][i] == 2){
+                                    printf(AMARILLO_F "[%d] "RESET_COLOR,vueloComprado->infoAvion->asientos[3][i]);
                                 }
                             } 
                             printf("\n");
